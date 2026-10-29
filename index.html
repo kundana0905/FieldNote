@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f5f2e9" />
+  <meta
+    name="description"
+    content="Gather visual inspiration for your next idea with Fieldnote."
+  />
+  <title>Fieldnote — collect a little inspiration</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="Fieldnote home">
+      <span class="brand-mark" aria-hidden="true">F</span>
+      <span>fieldnote<span class="brand-period">.</span></span>
+    </a>
+    <p class="header-note">A little inspiration goes a long way.</p>
+  </header>
+
+  <main class="page-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">YOUR VISUAL FIELD GUIDE</p>
+      <h1 id="page-title">Find a fresh point of view.</h1>
+      <p class="intro-copy">
+        Search a place, feeling, or passing thought. See where it takes you.
+      </p>
+
+      <form class="search-form" id="search-form" role="search">
+        <label class="visually-hidden" for="search-input">Search for images</label>
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <input
+          id="search-input"
+          name="query"
+          type="search"
+          placeholder="Try “quiet mornings”"
+          autocomplete="off"
+        />
+        <button id="search-button" type="button">Search <span aria-hidden="true">→</span></button>
+      </form>
+
+      <nav class="suggestions" aria-label="Suggested searches">
+        <span class="suggestions-label">A place to start</span>
+        <button class="suggestion-chip" type="button">Wild gardens</button>
+        <button class="suggestion-chip" type="button">Coastal light</button>
+        <button class="suggestion-chip" type="button">Slow living</button>
+      </nav>
+    </section>
+
+    <section class="gallery-section" aria-labelledby="gallery-title">
+      <div class="gallery-heading">
+        <div>
+          <p class="eyebrow">THE COLLECTION</p>
+          <h2 id="gallery-title">Your canvas</h2>
+        </div>
+        <p id="result-count" class="result-count">Your discoveries will gather here</p>
+      </div>
+
+      <section id="results" aria-label="Image search results" aria-live="polite"></section>
+      <p id="empty-state" class="empty-state">
+        <span class="empty-icon" aria-hidden="true">✳</span>
+        <span class="empty-title">Nothing here just yet.</span>
+        <span>Search for something you love and your collection will begin.</span>
+      </p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
