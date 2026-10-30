@@ -1,1 +1,1 @@
-// Part 2 will add image-search behavior.
+// Part 2 will add image search behavior.
