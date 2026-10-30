@@ -1,142 +1,85 @@
 const searchForm = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
-const searchButton = document.getElementById('search-button');
 const results = document.getElementById('results');
 const emptyState = document.getElementById('empty-state');
 const resultCount = document.getElementById('result-count');
 
-const inspirationLibrary = [
-  {
-    title: 'Quiet mornings',
-    tags: ['quiet', 'morning', 'light', 'calm', 'home'],
-    url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80',
-    alt: 'Quiet morning light in a cozy room'
-  },
-  {
-    title: 'Wild gardens',
-    tags: ['wild', 'garden', 'nature', 'lush', 'green'],
-    url: 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=900&q=80',
-    alt: 'Wild garden with green foliage'
-  },
-  {
-    title: 'Coastal light',
-    tags: ['coast', 'ocean', 'sea', 'light', 'beach'],
-    url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80',
-    alt: 'Coastal light over ocean waves'
-  },
-  {
-    title: 'Slow living',
-    tags: ['slow', 'living', 'home', 'calm', 'warm'],
-    url: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80',
-    alt: 'Slow living home interior with warm tones'
-  },
-  {
-    title: 'City corners',
-    tags: ['city', 'urban', 'street', 'architecture', 'travel'],
-    url: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80',
-    alt: 'City corner with architecture and streetlight'
-  },
-  {
-    title: 'Forest trails',
-    tags: ['forest', 'trail', 'nature', 'green', 'walk'],
-    url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80',
-    alt: 'Forest trail in a calm natural setting'
-  },
-  {
-    title: 'Old books',
-    tags: ['books', 'reading', 'library', 'quiet', 'study'],
-    url: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=80',
-    alt: 'Stack of old books on a shelf'
-  },
-  {
-    title: 'Golden hour',
-    tags: ['golden', 'hour', 'sunset', 'warm', 'evening'],
-    url: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=900&q=80',
-    alt: 'Golden hour landscape with warm tones'
-  },
-  {
-    title: 'Studio details',
-    tags: ['studio', 'creative', 'details', 'design', 'workspace'],
-    url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80',
-    alt: 'Creative studio workspace with natural light'
-  }
-];
-
-function normalizeQuery(query) {
-  return query.trim().toLowerCase();
-}
-
-function matchesQuery(item, searchTerm) {
-  if (!searchTerm) {
-    return true;
-  }
-
-  const haystack = [item.title, ...item.tags].join(' ').toLowerCase();
-  return haystack.includes(searchTerm);
-}
-
-function renderResults(items) {
+function renderResults(items, query) {
   results.innerHTML = '';
-
-  if (!items.length) {
-    results.hidden = true;
-    emptyState.hidden = false;
-    resultCount.textContent = 'No matches yet — try another idea.';
-    return;
-  }
-
-  results.hidden = false;
-  emptyState.hidden = true;
-  resultCount.textContent = `${items.length} discovery${items.length > 1 ? 'ies' : 'y'} ready to explore`;
+  let count = 0;
 
   items.forEach((item) => {
+    const imageUrl = item.imageinfo?.[0]?.thumburl;
+    if (!imageUrl) return;
+
     const card = document.createElement('article');
     card.className = 'result-card';
 
     const image = document.createElement('img');
-    image.src = item.url;
-    image.alt = item.alt;
+    image.src = imageUrl;
+    image.alt = item.title;
     image.loading = 'lazy';
 
     const caption = document.createElement('div');
     caption.className = 'result-card__meta';
-    caption.innerHTML = `<span class="result-card__label">Inspiration</span><h3>${item.title}</h3>`;
 
+    const label = document.createElement('span');
+    label.className = 'result-card__label';
+    label.textContent = 'Wikimedia Commons';
+
+    const title = document.createElement('h3');
+    title.textContent = item.title.replace(/^File:/, '').replace(/_/g, ' ');
+
+    caption.append(label, title);
     card.append(image, caption);
     results.appendChild(card);
+    count += 1;
   });
+
+  results.hidden = count === 0;
+  emptyState.hidden = count > 0;
+  resultCount.textContent = count
+    ? `Showing ${count} ${count === 1 ? 'image' : 'images'} for “${query}”`
+    : `No images found for “${query}” — try another search.`;
 }
 
-function performSearch(searchTerm) {
-  const normalized = normalizeQuery(searchTerm);
-  const filtered = inspirationLibrary.filter((item) => matchesQuery(item, normalized));
-  renderResults(filtered);
-}
-
-searchButton.addEventListener('click', () => {
-  performSearch(searchInput.value);
-});
-
-searchForm.addEventListener('submit', (event) => {
+searchForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  performSearch(searchInput.value);
-});
+  const query = searchInput.value.trim();
+  if (!query) return;
 
-searchInput.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    performSearch(searchInput.value);
+  const url =
+    'https://commons.wikimedia.org/w/api.php?action=query&generator=search' +
+    '&gsrsearch=' + encodeURIComponent(query) +
+    '&gsrnamespace=6&gsrlimit=12&prop=imageinfo' +
+    '&iiprop=url&iiurlwidth=300&format=json&origin=*';
+
+  results.innerHTML = '';
+  results.hidden = true;
+  emptyState.hidden = true;
+  resultCount.textContent = `Searching for “${query}”…`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`The image search failed (${response.status}). Please try again.`);
+    }
+
+    const data = await response.json();
+    const items = Object.values(data.query?.pages ?? {});
+    renderResults(items, query);
+  } catch (error) {
+    results.hidden = true;
+    emptyState.hidden = false;
+    resultCount.textContent =
+      error instanceof Error ? error.message : 'The image search failed. Please try again.';
   }
 });
 
-const suggestionButtons = document.querySelectorAll('.suggestion-chip');
-suggestionButtons.forEach((button) => {
+document.querySelectorAll('.suggestion-chip').forEach((button) => {
   button.addEventListener('click', () => {
-    const value = button.textContent.trim();
-    searchInput.value = value;
-    performSearch(value);
+    searchInput.value = button.textContent.trim();
+    searchForm.requestSubmit();
     searchInput.focus();
   });
 });
-
-renderResults(inspirationLibrary.slice(0, 6));
